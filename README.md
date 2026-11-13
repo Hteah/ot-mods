@@ -1,14 +1,33 @@
-# OT SAMPLERS
+# OT MODS
 
-**Four sampler machines for the Octatrack MKI: SAMPLER, RESAMPLE, LOOPER, RELOOPER.**
+**Firmware mods for the Elektron Octatrack MKI, by [Hteah](https://github.com/Hteah).**
+Built on [octabam](https://github.com/sambanks/octabam) and installed by
+building the OS on your own computer from Elektron's own 1.40C download.
 
-A firmware mod built on [octabam](https://github.com/sambanks/octabam). Pick
-one of these machines for a track and that track becomes its own sampler. You
-press the red key and you're recording.
+| mod | in one line | mini manual |
+|---|---|---|
+| **SAMPLER · RESAMPLE · LOOPER · RELOOPER** | four machines that make a track its own sampler: red key in, red key out | [mods/samplers.md](mods/samplers.md) |
+| **ACCENT** | TR-909-style soft and full steps on the trig keys | [mods/accent.md](mods/accent.md) |
+| **PAGE LOOP** | loop the 16-step page you're editing, stay in time | [mods/page-loop.md](mods/page-loop.md) |
+| **TRACK TRIG MODE** | each track remembers CHROMATIC / SLOTS / SLICES | [mods/track-trig-mode.md](mods/track-trig-mode.md) |
+| **TRIG MUTE** | mute one trig without deleting it | [mods/trig-mute.md](mods/trig-mute.md) |
+
+There are two builds to choose from:
+
+- **full** (default): all of the above, plus REC THRESHOLD, MUTE MODES, TAPE
+  ECHO, MINI VERB and ATA WRITE GUARD by other octabam authors
+  ([what those are](mods/also-included.md)). This is the set Hteah runs on his
+  own MKI.
+- **samplers**: only the four sampler machines (+ REC THRESHOLD, ATA WRITE
+  GUARD), with every effect stock.
+
+All the mods share one goal: **remove the settings you have to remember.**
+Each one takes something the Octatrack can already do and makes it one key
+press, or something you can see.
 
 ---
 
-## The manifesto
+## The sampler manifesto
 
 The Octatrack can sample anything, but on the MKI you have to plan it first.
 
@@ -40,9 +59,8 @@ Compared with stock, a track using one of these machines:
 - **Plays its own recording.** The track's Flex slot already points at its own
   recorder buffer, so there's nothing to load or assign. Put a trig down and
   the take plays. Sequence it, p-lock it, slice it like any Flex sample.
-- **Is set up when you choose the machine.** TRIG, RLEN and the sources (A B / C D
-  for the input machines, SRC3 MAIN for the internal ones) are set for you.
-  Choose a stock machine and the track goes back to normal.
+- **Is set up when you choose the machine.** TRIG, RLEN and the sources are
+  set for you. Choose a stock machine and the track goes back to normal.
 - **Records on one key.** The red key alone starts and stops a take, whether
   the sequencer is playing or stopped. You don't need a TRACK key combo or
   RECORD QUICK MODE.
@@ -51,37 +69,34 @@ Compared with stock, a track using one of these machines:
   tracks.
 - **Keeps every take (SAMPLER / RESAMPLE).** Each take is checked for silence
   and normalized, then written to the card as `AUDIO/SMPL/R1-YYMMDD-HHMM.wav`.
-  Nothing is ever overwritten. A silent take shows NO SOUND IN TAKE and isn't
-  saved. If you don't want a take, TRASH TAKE moves it to `AUDIO/SMPL/TRASH`.
+  Nothing is ever overwritten. TRASH TAKE moves a take you don't want to
+  `AUDIO/SMPL/TRASH`.
 - **Monitors through the track.** While it's empty or recording, a SAMPLER
-  track plays its input through its own AMP and effects, so you hear them as
-  you play. The file is recorded dry.
-- **Records loops of the track (LOOPER / RELOOPER).** Put a recorder trig and a
-  sample trig on step 1. RLEN counts *passes of the track*, not steps, and the
-  take stops exactly on the loop point and starts playing. You get one take
-  per run. STOP and PLAY to record a new one, or keep a take with FILE > SAVE
-  AND ASSIGN (three presses, no typing).
+  track plays its input through its own AMP and effects. The file is recorded
+  dry.
+- **Records loops of the track (LOOPER / RELOOPER).** RLEN counts *passes of
+  the track*, not steps, and the take stops exactly on the loop point and
+  starts playing. STOP and PLAY records a new one. FILE > SAVE AND ASSIGN keeps
+  one (three presses, no typing).
 
 Everything else on the Octatrack, and every track not using one of these
-machines, works as stock.
-
-> The full behaviour of every machine, down to the firmware sites, is in
-> [overlay/modules/smpl/README.md](overlay/modules/smpl/README.md).
+machines, works as stock. → **[Mini manual](mods/samplers.md)**
 
 ---
 
 ## Install
 
-You build the OS on your own Mac or Linux machine from Elektron's own 1.40C
-download. **No Elektron firmware is stored in this repository or shared by
-it.** The installer downloads the official OS from elektron.se and adds the
-sampler machines to it on your computer.
+**No Elektron firmware is stored in this repository or shared by it.** The
+installer downloads the official OS 1.40C from elektron.se and adds the mods
+to it on your computer.
 
 ```bash
-git clone https://github.com/Hteah/ot-samplers.git
-cd ot-samplers
-./install.sh                         # -> dist/OCTATRACK_SAMPLERS1.bin
-./install.sh --card /Volumes/OCTA    # same, then copies it to your CF card
+git clone https://github.com/Hteah/ot-mods.git
+cd ot-mods
+./install.sh                          # full build -> dist/OCTATRACK_HTEAH1.bin
+./install.sh --remix samplers         # samplers only -> dist/OCTATRACK_SAMPLERS1.bin
+./install.sh --card /Volumes/OCTA     # also copy it to your CF card (checked)
+./install.sh --build 2                # version number shown on the OT
 ```
 
 Requirements: macOS with [Homebrew](https://brew.sh) and the Xcode Command
@@ -92,15 +107,14 @@ that a rebuild takes a few minutes.
 
 ### Flash it
 
-1. Copy `OCTATRACK_SAMPLERS1.bin` to the root of the CF card and put the card
-   in the Octatrack.
+1. **Back up your CF card.** Copy the `.bin` to the root of the card and put
+   the card in the Octatrack.
 2. **PROJECT > SYSTEM > OS UPGRADE**, choose the file, confirm.
 3. When it has restarted, **PROJECT > SYSTEM > OS VERSION** should read
-   `SAMPLERS1`. If it still says 1.40C, power off and on and run OS UPGRADE
-   again (the first try sometimes doesn't take).
+   `HTEAH1` (or `SAMPLERS1`). If it still says 1.40C, power off and on and
+   run OS UPGRADE again (the first try sometimes doesn't take).
 
-Back up your CF card first. This is unofficial firmware: use it at your own
-risk.
+This is unofficial firmware: use it at your own risk.
 
 ### Going back
 
@@ -111,57 +125,38 @@ risk.
   Startup Menu, choose **MIDI UPGRADE** (TRIG 3), and send the stock
   `OCTATRACK_OS1.40C.syx` over DIN MIDI with a SysEx tool.
 
-### Using a machine
-
-Double-tap a **TRACK** key, press **LEFT** for the machine list and scroll
-down past PICKUP: you'll see SAMPLER, RESAMPLE, LOOPER, RELOOPER. (FUNC + SRC
-gets there too.)
+Projects stay readable on stock: soft steps are ordinary VOL locks, trig modes
+are a comment line stock skips, and sampler takes are ordinary WAVs. The only
+loss is that muted trigs play again (their condition shows ERR on stock).
 
 ---
 
 ## What's been tested
 
-- **Hardware:** all four machines were tested on an Octatrack **MKI** in
-  November 2026 (Heath's image ACCLOOP32). That image also contained his other
-  mods. The image this installer builds has only the samplers, plus REC
-  THRESHOLD and ATA WRITE GUARD, with the stock effects. It's built from the
-  same module source and passes the same gates in the emulator, but this exact
-  image hasn't been flashed to hardware.
-- **Emulator:** `make check REMIX=samplers` passes. That's octabam's full build
-  and every gate under its ColdFire/DSP port, with the MKI panel, including
-  the `verify_smpl` scenarios: key takes, trig takes over RLEN loops, 16- and
-  24-bit saves, silent-take refusal, save lock, monitoring, trash, threshold
-  takes.
-- **MKII:** not tested. The machine-list code comes from modules that have
-  run on an MKII, but the sampler machines have only been run on an MKI.
-
-### Known limits and gotchas
-
-- A take can only be as long as recorder memory allows (**CONTROL > MEMORY**;
-  16 s by default).
-- **RELOOPER / RESAMPLE with SRC3 MAIN** record themselves if their own track
-  plays while recording, which causes feedback. Use SRC3 CUE (and cue only the
-  tracks you want) or one track as the source.
-- **SRC3 CUE records nothing** until you cue some tracks (CUE + TRACK).
-- **QREC on SAMPLER:** if the SCALE master length is INF, QREC = PLEN never
-  fires, so it looks like the take never starts. Set QREC to a step count (for
-  example 16) or OFF.
-- LOOPER / RELOOPER takes stay in RAM and are lost at power-off unless you
-  save them. After a reload the looper track starts empty. To keep a loop in
-  the project, assign the saved file to a Static or Flex slot.
-- This build can't be combined with octabam's CX OSC, SYNTH MACHINE, ANALOG BD
-  or OCTA303 (they use the same machine-list rows), or with BUFFER SAVER or
-  PERSISTENT BUFFERS (they save the same buffers).
+- **Hardware (MKI):** every mod has run on Hteah's MKI. ACCENT and PAGE LOOP
+  since 25 Oct 2026, TRACK TRIG MODE since 27 Oct, TRIG MUTE since 28 Oct, and
+  all four sampler machines in ACCLOOP32 (8–11 Nov 2026).
+- **The full build *is* ACCLOOP32.** `./install.sh --build 32 --name
+  ACCLOOP32` rebuilds the exact image tested on the MKI, byte for byte
+  (compared against the ACCLOOP32 file that was flashed). With the default name only the
+  version text differs.
+- **The samplers build** uses the same module source but hasn't itself been
+  flashed.
+- **Emulator:** `make check` passes for both builds. That's octabam's full
+  build plus every gate under its ColdFire/DSP port with the MKI panel
+  (`verify_smpl`, `verify_accent`, `verify_page_loop`,
+  `verify_track_trig_mode`, `verify_trig_mute`).
+- **MKII:** not tested.
 
 ---
 
 ## How it was built (and building your own)
 
-**[BUILDING.md](BUILDING.md)** covers how these machines were built: the
-method, the firmware sites they hook, how they were tested, and what went
-wrong on the way. It's written so you can hand it to your own AI coding agent
-and have it rebuild these machines or make new ones. [AGENTS.md](AGENTS.md) is
-the short brief for the agent.
+**[BUILDING.md](BUILDING.md)** covers how these mods were built: the method,
+the firmware sites they hook, how they were tested, and what went wrong on
+the way. It's written so you can hand it to your own AI coding agent and have
+it rebuild these mods or make new ones. [AGENTS.md](AGENTS.md) is the short
+brief for the agent.
 
 ## What's in this repo
 
@@ -169,21 +164,24 @@ the short brief for the agent.
 |---|---|
 | `install.sh` | the installer: clone octabam at the pinned commit, add the overlay, build |
 | `OCTABAM_COMMIT` | the octabam commit everything was built and tested against |
-| `overlay/modules/smpl/` | the module: `machine.s` (ColdFire assembly), `manifest.py` (its hooks), README |
-| `overlay/modules/rec-threshold/` | REC THRESHOLD with the hook SAMPLER uses for threshold takes |
-| `overlay/remixes/samplers/` | the remix: SMPL + REC THRESHOLD + ATA WRITE GUARD + the 14 stock effects |
-| `overlay/tools/verify/verify_smpl.py` | the emulator gates |
-| `BUILDING.md`, `AGENTS.md` | how it was made |
+| `mods/` | an explanation and mini manual for each mod |
+| `overlay/modules/{smpl,accent,page-loop,track-trig-mode,trig-mute}/` | the mods' source (ColdFire assembly + `manifest.py` hooks + a technical README) |
+| `overlay/remixes/test/hteah-thr/` | the **full** build |
+| `overlay/remixes/samplers/` | the **samplers** build |
+| `overlay/tools/verify/verify_*.py` | the emulator gates |
+| `overlay/…` (other) | small changes to octabam: the REC THRESHOLD hook, TAPE ECHO / MINI VERB labels, an emulator fix, docs |
 
 ## Credits and licence
 
-- SAMPLER / RESAMPLE / LOOPER / RELOOPER: **[Hteah](https://github.com/Hteah)**,
-  designed on and for his MKI and built with Claude (Anthropic) as the coding
-  agent.
+- SAMPLER / RESAMPLE / LOOPER / RELOOPER, ACCENT, PAGE LOOP, TRACK TRIG MODE,
+  TRIG MUTE: **[Hteah](https://github.com/Hteah)**, designed on and for his
+  MKI and built with Claude (Anthropic) as the coding agent.
 - **[octabam](https://github.com/sambanks/octabam)** by Sam Banks and
-  contributors (MIT): the remixer, the build, the emulator, and REC THRESHOLD
-  (Chupitnik) and ATA WRITE GUARD (sambanks).
-- The machine-list code is **Tim Hastie's** v2.15 `machine.s`
+  contributors (MIT): the remixer, the build, the emulator, and the modules
+  in [also-included](mods/also-included.md): REC THRESHOLD (Chupitnik), MUTE
+  MODES (Zac Kyoti), TAPE ECHO and MINIVERB (repeat98), ATA WRITE GUARD (Sam
+  Banks).
+- The sampler machine-list code is **Tim Hastie's** v2.15 `machine.s`
   ([octatrick-modules](https://github.com/timhastie/octatrick-modules), MIT), as
   carried by ilia-murzinov's CX OSC. Tim adapted it from Modwerk's FM Synth
   ([repeat98/modwerk](https://github.com/repeat98/modwerk), MIT). See

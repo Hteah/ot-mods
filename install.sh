@@ -1,21 +1,27 @@
 #!/usr/bin/env bash
-# OT SAMPLERS installer: builds an Octatrack MKI OS image with the four sampler
-# machines (SAMPLER, RESAMPLE, LOOPER, RELOOPER) on your own computer.
+# OT MODS installer: builds an Octatrack MKI OS image with Hteah's mods on your
+# own computer.
+#   full     (default) SAMPLER/RESAMPLE/LOOPER/RELOOPER, ACCENT, PAGE LOOP, TRACK
+#            TRIG MODE, TRIG MUTE + REC THRESHOLD, MUTE MODES, TAPE ECHO, MINI
+#            VERB, ATA WRITE GUARD (= the image tested on the MKI, ACCLOOP32)
+#   samplers the four sampler machines + REC THRESHOLD, ATA WRITE GUARD
 #
 # What it does, in order:
 #   1. clones octabam (github.com/sambanks/octabam, MIT) at the commit these
-#      machines were built and tested against
-#   2. copies this repo's overlay/ on top (the SMPL module + the "samplers" remix)
+#      mods were built and tested against
+#   2. copies this repo's overlay/ on top (the mods' modules and remixes)
 #   3. installs the build tools (Homebrew on macOS, apt on Debian/Ubuntu/WSL2)
 #   4. downloads the official Octatrack OS 1.40C from Elektron's own site
 #      (nothing from Elektron is stored in this repo)
-#   5. builds the image and puts OCTATRACK_SAMPLERS<n>.bin in ./dist
+#   5. builds the image and puts OCTATRACK_<NAME>.bin in ./dist
 #   6. optionally copies it to your Octatrack's CF card (--card /Volumes/NAME)
 #
 # Usage:
-#   ./install.sh                       # build into ./dist
+#   ./install.sh                       # full build into ./dist (OCTATRACK_HTEAH1.bin)
+#   ./install.sh --remix samplers      # samplers only (OCTATRACK_SAMPLERS1.bin)
 #   ./install.sh --card /Volumes/OCTA  # build, then copy to the CF card
-#   ./install.sh --build 2             # version number shown on the OT (default 1)
+#   ./install.sh --build 2             # build number (default 1)
+#   ./install.sh --name MYOS2          # OS VERSION text (default HTEAH<n> / SAMPLERS<n>)
 #   ./install.sh --dir ~/somewhere     # where octabam is cloned (default ./work/octabam)
 #
 # Flash it: CF card in the OT, PROJECT > SYSTEM > OS UPGRADE, pick the file.
@@ -29,19 +35,28 @@ OCTABAM_COMMIT="$(tr -d '[:space:]' < "$HERE/OCTABAM_COMMIT")"
 DIR="$HERE/work/octabam"
 BUILD=1
 CARD=""
+KIND=full
+NAME=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --card)  CARD="${2:?--card needs a path, e.g. /Volumes/OCTATRACK}"; shift 2 ;;
     --build) BUILD="${2:?--build needs a number}"; shift 2 ;;
+    --remix) KIND="${2:?--remix needs full or samplers}"; shift 2 ;;
+    --name)  NAME="${2:?--name needs a name}"; shift 2 ;;
     --dir)   DIR="${2:?--dir needs a path}"; shift 2 ;;
-    -h|--help) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option: $1 (try --help)" >&2; exit 1 ;;
   esac
 done
 case "$BUILD" in ''|*[!0-9]*) echo "--build must be a number" >&2; exit 1 ;; esac
-VERSION="SAMPLERS$BUILD"
-[ ${#VERSION} -le 15 ] || { echo "--build too long" >&2; exit 1; }
+case "$KIND" in
+  full)     REMIX=hteah-thr; VERSION="${NAME:-HTEAH$BUILD}" ;;
+  samplers) REMIX=samplers;  VERSION="${NAME:-SAMPLERS$BUILD}" ;;
+  *) echo "--remix must be full or samplers" >&2; exit 1 ;;
+esac
+case "$VERSION" in *[!A-Z0-9]*) echo "--name: capital letters and digits only" >&2; exit 1 ;; esac
+[ ${#VERSION} -le 15 ] || { echo "--name / --build too long (15 characters)" >&2; exit 1; }
 
 say() { printf '\n== %s\n' "$*"; }
 
@@ -64,7 +79,7 @@ git checkout --quiet --force "$OCTABAM_COMMIT"
 git submodule update --init --quiet
 
 # --- 2. the overlay ------------------------------------------------------------
-say "adding the sampler machines (overlay/)"
+say "adding the mods (overlay/)"
 cp -R "$HERE/overlay/." "$DIR/"
 
 # --- 3. tools --------------------------------------------------------------------
@@ -89,8 +104,8 @@ if [ ! -f out/raw/section_3_MAIN_OS.bin ]; then
 fi
 
 # --- 5. build ----------------------------------------------------------------------
-say "building $VERSION (a few minutes)"
-make image REMIX=samplers BUILD="$BUILD" VERSION="$VERSION"
+say "building $VERSION: $KIND (a few minutes)"
+make image REMIX=$REMIX BUILD="$BUILD" VERSION="$VERSION"
 mkdir -p "$HERE/dist"
 BIN="$HERE/dist/OCTATRACK_$VERSION.bin"
 cp "out/OCTATRACK_$VERSION.bin" "$BIN"

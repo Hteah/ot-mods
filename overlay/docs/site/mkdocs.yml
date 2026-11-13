@@ -60,6 +60,7 @@ nav:
       - Rig Hosts: reference/modules/rig-hosts.md
       - Tempo Sync: reference/modules/tempo-sync.md
   - Machines and Sequencer:
+      - Accent: reference/modules/accent.md
       - Analog BD: reference/modules/analog-bassdrum.md
       - Blackpyramids 303: reference/modules/blackpyramids-303.md
       - Direct Jump: reference/modules/direct-jump.md
@@ -67,6 +68,7 @@ nav:
       - Erase Empty Trigless Locks: reference/modules/erase-empty-trigless-locks.md
       - Euclid Fill: reference/modules/euclid-fill.md
       - Mute Modes: reference/modules/mute-modes.md
+      - Page Loop: reference/modules/page-loop.md
       - OCTA-303: reference/modules/octa303.md
       - Page 2 Parameter Locks: reference/modules/plocks-p2.md
       - Quantize Live Rec Toggle: reference/modules/quantize-live-rec-toggle.md
@@ -80,6 +82,8 @@ nav:
       - Cx Osc: reference/modules/cxosc.md
       - Synth Machine: reference/modules/synth.md
       - Tempo Controls: reference/modules/tempo-bus.md
+      - Track Trig Mode: reference/modules/track-trig-mode.md
+      - Trig Mute: reference/modules/trig-mute.md
       - Tuner: reference/modules/tuner.md
       - Varispeed: reference/modules/varispeed.md
   - Kits and Scenes:

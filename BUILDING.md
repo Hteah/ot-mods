@@ -1,13 +1,19 @@
-# How these machines were built
+# How these mods were built
 
-These notes cover how SAMPLER, RESAMPLE, LOOPER and RELOOPER were made, so you
-or your AI coding agent can rebuild them, change them, or use the same method
-for a different machine. They were built between 23 Oct and 11 Nov 2026. Hteah
-designed them and tested them on his MKI, and Claude (Anthropic's coding agent,
-in Claude Code) wrote and verified the code. It took about 30 flashed test
-images (ACCLOOP2 … ACCLOOP32).
+These notes cover how Hteah's Octatrack MKI mods were made, so you or your AI
+coding agent can rebuild them, change them, or use the same method for a mod
+of your own. All of them were built between 21 Oct and 11 Nov 2026. Hteah
+designed them and tested them on his MKI, and Claude (Anthropic's coding
+agent, in Claude Code) wrote and verified the code. It took about 30 flashed
+test images (ACCLOOP1 … ACCLOOP32), and the **full** build in this repo
+rebuilds ACCLOOP32 byte for byte.
 
-If you only want to *use* the machines, run `./install.sh` (see README).
+Sections 1–2 are the method and tools, which are the same for every mod.
+Sections 3–4 go deep on the sampler machines, the biggest of the mods.
+Section 7 covers ACCENT, PAGE LOOP, TRACK TRIG MODE and TRIG MUTE.
+
+If you only want to *use* the mods, run `./install.sh` (see README) and read
+[`mods/`](mods/).
 
 ---
 
@@ -57,7 +63,7 @@ If you only want to *use* the machines, run `./install.sh` (see README).
   `docs/contributing/TRAPS.md` first. TRAPS.md is the list of mistakes that
   have already cost people days.
 
-## 3. Architecture
+## 3. Architecture of the sampler machines
 
 Everything is one octabam **ColdFire module** (`modules/smpl`, kind
 `CF_PATCH`): a GNU-as unit (`machine.s`, ~3,200 lines) linked into DRAM, plus
@@ -223,9 +229,9 @@ Give your agent this repo, octabam, and something like:
 
 > Clone octabam at the commit in `OCTABAM_COMMIT` into a git worktree. Read its
 > AGENTS.md, docs/contributing/MODULES.md and TRAPS.md. Copy `overlay/` on top
-> and run `make check REMIX=samplers` until it passes. Then read
-> `overlay/modules/smpl/README.md` and `BUILDING.md` and explain the design
-> back to me before changing anything. For any change: write a gate in
+> and run `make check REMIX=hteah-thr` (and `REMIX=samplers`) until it passes.
+> Then read the module README under `overlay/modules/<mod>/` and `BUILDING.md`
+> and explain the design back to me before changing anything. For any change: write a gate in
 > `tools/verify/verify_smpl.py` first, prove it fails on the old code, then make
 > it pass. Never commit Elektron bytes. Give me a short list of hardware checks
 > with every image.
@@ -246,12 +252,91 @@ the stock `.syx` over DIN MIDI.
 
 `OCTABAM_COMMIT` pins the octabam these files were built against. To move
 forward: check out a newer octabam in a worktree, copy the overlay, and run
-`make check REMIX=samplers`. Then:
+`make check REMIX=hteah-thr` and `REMIX=samplers`. Then:
 
 - Expect conflicts in `modules/rec-threshold/thresh.s`, because the overlay
   replaces the whole file. Re-apply the `sm_thr_src` weak-reference hook onto
   upstream's version rather than overwriting it.
 - `tools/emu/ot_emu/machine.{cpp,h}` carry the straddling-access port fix
   (`Machine::straddles`), which the 24-bit gates need.
-- If `tools/remix/selftest.py` complains about DSP words for `smpl` /
-  `samplers`, add them to its "ColdFire, no DSP words" list.
+- If `tools/remix/selftest.py` complains about DSP words for one of these
+  remixes, add it to its "ColdFire, no DSP words" list.
+- `modules/tapeecho` and `modules/miniverb` manifests carry only display-label
+  changes (TAPE ECHO / MINI VERB, DEC); re-apply them on upstream's files.
+
+## 7. The other mods
+
+Each one is a small ColdFire module: one GNU-as unit in DRAM, a handful of
+detours, a gate. The technical README beside each one lists every site.
+
+### ACCENT (`modules/accent`, 3 detours)
+
+- **Idea:** a "soft" step is just an AMP VOL lock at Part VOL/√2 (-6 dB under
+  the (v/127)² law). So it saves, copies and undoes like any lock, and stock
+  plays it. Nothing new is stored.
+- **Trig-key release** (`0x400601aa`, audio branch of `0x4005fb44`): where
+  stock would remove a trig flagged at press, a full trig gets the soft lock
+  instead, written exactly as stock's own lock store does (bank blob + battery
+  mirror, the step's lock bit, the edited flags). A soft trig falls through
+  to stock's removal.
+- **LEDs** (`0x40034e5e`, inside the grid painter between its colour and level
+  passes): soft steps get level 5 in the painter's own level array, so there's
+  no flicker.
+- **On/off** (`0x4004e978`, the CUE press): with a TRACK key held it toggles
+  and shows a toast. TRACK-then-CUE was measured to do nothing on stock;
+  FUNC + CUE was taken (RELOAD PART).
+- **Gate:** `verify_accent.py` covers the tap cycle, the lock in the blob and
+  mirror, LED levels decoded from the panel link, and playback AMP VOL 45 vs 64.
+
+### PAGE LOOP (`modules/page-loop`)
+
+- **Key finding:** the per-track play step `0x800064d0[t]` *is* the position.
+  The tick increments it in place (`0x400a3d72` audio / `0x400a3e8c` MIDI) and
+  clears it at the length. A first design based on a static read (that it was
+  copied from `0x800065e4`) did nothing under the port and was thrown away.
+  Write-watch before you design.
+- **Design:** the looped track's true position lives in a shadow; the module
+  stores `page·16 + (true & 15) % span` in the step byte, so every reader
+  (trig build, locks, micro timing, playhead LED) loops for free, and the
+  length compare still sees the true position, so it rejoins in time.
+- **Sites:** the increments and clears above, transport start (`0x4009bcb6` /
+  `0x4009bde6`), and the PAGE-held key layer (`0x400beef4`, a SymbolRef adding
+  trig 1–4 rows). The tick code touches only its own data and the step bytes,
+  with no UI or kernel calls from the sequencer tick.
+- **Gate:** `verify_page_loop.py`.
+
+### TRACK TRIG MODE (`modules/track-trig-mode`, 7 detours)
+
+- FUNC + UP / DOWN (`0x40051f18` / `0x40051f88`) record a CHROMATIC / SLOTS /
+  SLICES pick for the track, and track select (`0x40083c3a`) shows the track's
+  own mode. TRACKS / QUICK MUTE / DELAY CONTROL stay global.
+- **Persistence:** the project writer (`0x40088da0`) adds `#TRIG_MODES=…` as a
+  *comment* line in `[SETTINGS]`, because stock refuses unknown keys but
+  skips `#` lines. The parser (`0x400866c4`, `0x400867a2`) reads it back.
+- **Hardware lesson (ACCLOOP14):** the modes survived save/reload but not a
+  power cycle. Power-up restores from battery RAM and never parses the
+  project file, so the table moved to 8 bytes of battery RAM (`0x100f85e8`),
+  and the boot hook sits just after the bank read (`0x40084d66`).
+- **Hardware lesson (ACCLOOP16):** stepping out of QUICK MUTE wrote the mode it
+  passed over onto the track. The fix was that only a step *between* the
+  three track modes changes a track's mode.
+- **Gate:** `verify_track_trig_mode.py`, which includes the saved project
+  parsing on the stock OS and a power cycle.
+
+### TRIG MUTE (`modules/trig-mute`, 5 detours + 1 poke)
+
+- **Storage:** the mute lives in the trig's condition byte. Stock uses 0..64,
+  and a muted trig stores condition + 65. So it saves, copies and survives
+  power cycles with the pattern, with no new storage. A poke (`0x4009a858`)
+  stops the post-load pattern check clamping values > 64.
+- **Sites:** the step handler's condition test (`0x4009d34e`: a muted trig
+  fails it, like a failed condition, so no trig and no locks, but recorder
+  trigs still run); the condition label, read and write (`0x4002ce78`,
+  `0x4002daea`, `0x4002db72`) so editing shows and keeps the real condition;
+  the lock-flash pass (`0x40034346`) for the blink; the trig-held key layer
+  (`0x400bee78`) for FUNC.
+- 7:8 / 8:8 can't be muted: their value + 65 would pass 127, the most the
+  pattern check allows (inferred from the ranges, not separately measured).
+- **Hardware note:** a red/green flash Hteah saw was the *stock* sample-lock
+  flash, not a bug. Check stock behaviour before "fixing" something.
+- **Gate:** `verify_trig_mute.py`.

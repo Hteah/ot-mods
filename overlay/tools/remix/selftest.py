@@ -914,11 +914,12 @@ def main():
              "analog-bassdrum": ("SPRING REV",),
               "blackpyramids-303": ("SPRING REV",),   # its DSP voice in SPRING's words, as ANALOG BD's
              "sidechain-compressor": ("SPRING REV",), "kyoti-mute-sidechain": ("SPRING REV",),   # its DSP section in SPRING's words
+             "hteah-thr": ("SPRING REV", "DARK REV"),   # TAPE ECHO on SPRING's id (DSP passthrough), MINIVERB on DARK's
              # Zac Kyoti's ColdFire modules on the stock effects, no DSP words
              **{_k: () for _k in ("direct-jump-kyoti", "batch-bugfixes", "reload-from-project",
                                   "quantize-live-rec-toggle", "erase-empty-trigless-locks",
                                   "mute-modes", "kyoti-mute-jump", "kyoti-fixes", "rec-trig-mute",
-                                  "euclid-fill", "smpl", "samplers", "varispeed", "copy-project",
+                                  "euclid-fill", "page-loop", "accent", "accent-page-loop", "smpl", "samplers", "hteah-mods", "varispeed", "copy-project",
                                   "cxosc", "cxosc-core")},  # CX OSC (+ CORE handoff); ColdFire, no DSP words
              # the twelve io remixes: the IN module's RX inject is placed in SPATIALIZER's words
              **{f"usb-io-{o}-{i}": ("SPATIALIZER",) for o in ("tracks", "tracks-main-cue", "main-cue", "main") for i in ("ab", "cd", "abcd")},

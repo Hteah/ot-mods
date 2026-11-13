@@ -4,6 +4,8 @@ Each carries one module, or one combination, for that module's gates: `make chec
 
 | remix | contains | proof |
 |---|---|---|
+| [`accent`](accent/README.md) | stock effects with ACCENT: TR-style soft / full steps in GRID RECORDING. | `make check` |
+| [`accent-page-loop`](accent-page-loop/README.md) | stock effects with ACCENT and PAGE LOOP: soft/full steps and a looped page. | `make check` |
 | [`analog-bassdrum`](analog-bassdrum/README.md) | Analog BD source machine, switchable 808/909, stock AMP and FX. | port-gated: source/UI under the port; earlier ANALOGBD1 auditioned on MK1, current revision unflashed |
 | [`ata-write-guard`](ata-write-guard/README.md) | Stock effects with the first PIO card write guarded through bookkeeping. | port-gated: forced completion-interrupt gate under the port; not on hardware |
 | [`batch-bugfixes`](batch-bugfixes/README.md) | stock effects with BATCH_BUGFIXES: the MIDI Plays-Free trig, empty-pattern LED and Part-change carryover fixes. | `make check` |
@@ -27,6 +29,8 @@ Each carries one module, or one combination, for that module's gates: `make chec
 | [`euclid`](euclid/README.md) | Euclid rhythmic modulation: 12 dB LP/BP/HP or AMP, both FX slots. | port-gated: Shared event migration: firmware/render validation |
 | [`euclid-fill`](euclid-fill/README.md) | stock effects with EUCLID FILL: TRACK+PAGE Euclidean trig-fill page. | `make check` |
 | [`gateverb`](gateverb/README.md) | GATE VERB alone: the fixture of its render gate. | local render: `verify_gateverb`; not flashed |
+| [`hteah-mods`](hteah-mods/README.md) | stock effects with ACCENT, PAGE LOOP and SMPL: soft/full steps, a looped page, sampler machines. | `make check` |
+| [`hteah-thr`](hteah-thr/README.md) | hteah-mods plus REC THRESHOLD, MUTE MODES, TAPE ECHO (SPRING REV's slot), MINIVERB (DARK REV's slot), ATA WRITE GUARD. | `make check` |
 | [`kits`](kits/README.md) | KITS (255 Kits per project) on the stock effects. | port-gated: verify_kits under the port |
 | [`kyoti-fixes`](kyoti-fixes/README.md) | stock effects with QUANTIZE_LIVE_REC_TOGGLE, ERASE_EMPTY_TRIGLESS_LOCKS and BATCH_BUGFIXES together. | `make check` |
 | [`kyoti-mute-jump`](kyoti-mute-jump/README.md) | stock effects with MUTE_MODES and DIRECT_JUMP_KYOTI together. | `make check` |
@@ -41,6 +45,7 @@ Each carries one module, or one combination, for that module's gates: `make chec
 | [`mute-modes`](mute-modes/README.md) | stock effects with MUTE_MODES: PERSONALIZE > MUTE MODE (OT, OTFX, OTFX-T, DT-T). | `make check` |
 | [`octa303`](octa303/README.md) | the OCTA-303 machine (a circuit-modelled TB-303 voice on the ColdFire) with the stock effects. | port-gated: built and its UI gate run under the port, 19 Oct 2026; OCTA303 itself on the owner's MK1 in remix acidtrack (ACIDV70, BUILD 87) |
 | [`octatrick`](octatrick/README.md) | SYNTH MACHINE + SCALE QUANTIZER + DIRECT JUMP + TUNER + USB (20 channels out, 4 in onto A-D) on the stock effects less SPATIALIZER. | on hardware: Tim's MKI, test build 3.0 b40 (this selection at BUILD 40), 29 Sep 2026: USB AUDIO IN brings the Mac's audio onto the inputs in a one-minute check (long runs not yet tested). The same four modules with the 26 Sep USB AUDIO (out only) ran on the same MKI through the 2.9 test builds; the tuner works on test build 3.0 b40 (UP + TEMPO); the last two 2.9 fixes are not yet confirmed on hardware |
+| [`page-loop`](page-loop/README.md) | stock effects with PAGE LOOP: loop one page of one track, in time. | `make check` |
 | [`persistent-buffers`](persistent-buffers/README.md) | Recorder buffers BUFFERS/REC1.wav..REC8.wav under the project on SAVE / LOAD. | `make check`: verify_persistent_buffers under the port |
 | [`plocks-p2`](plocks-p2/README.md) | Page-2 parameter locks (PLOCKS P2) and page-2 scene locks (SCENES P2), stock effects. | port-gated: verify_plocks_p2 under the port |
 | [`quantize-live-rec-toggle`](quantize-live-rec-toggle/README.md) | stock effects with QUANTIZE_LIVE_REC_TOGGLE: QUANTIZE LIVE REC from [REC] + [PLAY]. | `make check` |
